@@ -1,12 +1,12 @@
 package com.sprint.mission.findex.domain.syncclient.dto;
 
+import java.util.Collections;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
 public class KrxItems {
-    private List<IndexDataApiResponse> item;
+    private List<IndexDataApiResponse> item = Collections.emptyList();
 }
