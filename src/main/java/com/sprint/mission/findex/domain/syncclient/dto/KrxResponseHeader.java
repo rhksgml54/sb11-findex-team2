@@ -1,12 +1,7 @@
 package com.sprint.mission.findex.domain.syncclient.dto;
 
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Getter
-@NoArgsConstructor
-public class KrxResponseHeader {
-    private String resultCode;
-    private String resultMsg;
+public record KrxResponseHeader(
+        String resultCode,
+        String resultMsg
+) {
 }

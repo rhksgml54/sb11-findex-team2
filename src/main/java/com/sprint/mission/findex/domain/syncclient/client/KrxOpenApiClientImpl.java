@@ -35,8 +35,8 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
             ObjectMapper objectMapper
     ) {
         this.restTemplate = restTemplateBuilder
-                .setConnectTimeout(Duration.ofSeconds(3))
-                .setReadTimeout(Duration.ofSeconds(5))
+                .connectTimeout(Duration.ofSeconds(3))
+                .readTimeout(Duration.ofSeconds(5))
                 .build();
         this.baseUrl = baseUrl;
         this.apiKey = apiKey;
@@ -46,13 +46,13 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
     @Override
     public List<IndexDataApiResponse> fetchByDateRange(String indexName, LocalDate from, LocalDate to) {
         if (indexName == null || indexName.isBlank()) {
-            throw new IllegalArgumentException("indexName must not be blank");
+            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
         }
         if (from == null || to == null) {
-            throw new IllegalArgumentException("from and to must not be null");
+            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
         }
         if (from.isAfter(to)) {
-            throw new IllegalArgumentException("from must be before or equal to to");
+            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
         }
 
         try {
@@ -81,14 +81,14 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
                 KrxApiResponseWrapper wrapper =
                         objectMapper.readValue(responseBody, KrxApiResponseWrapper.class);
 
-                if (wrapper.getResponse() == null
-                        || wrapper.getResponse().getBody() == null
-                        || wrapper.getResponse().getBody().getItems() == null) {
+                if (wrapper.response() == null
+                        || wrapper.response().body() == null
+                        || wrapper.response().body().items() == null) {
                     break;
                 }
 
                 List<IndexDataApiResponse> pageItems =
-                        wrapper.getResponse().getBody().getItems().getItem();
+                        wrapper.response().body().items().item();
 
                 if (pageItems == null || pageItems.isEmpty()) {
                     break;
@@ -105,6 +105,8 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
 
             return allItems.isEmpty() ? Collections.emptyList() : allItems;
 
+        } catch (ApiException e) {
+            throw e;
         } catch (RestClientException e) {
             throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
         } catch (Exception e) {
