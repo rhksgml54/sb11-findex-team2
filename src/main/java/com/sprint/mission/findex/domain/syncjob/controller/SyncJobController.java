@@ -2,9 +2,8 @@ package com.sprint.mission.findex.domain.syncjob.controller;
 
 import com.sprint.mission.findex.domain.syncjob.controller.api.SyncJobApi;
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
-import com.sprint.mission.findex.domain.syncjob.dto.SyncJobSearchCondition;
+import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.service.SyncJobService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,11 +27,10 @@ public class SyncJobController implements SyncJobApi {
   @PostMapping("/index-infos")
   @Override
   public ResponseEntity<List<SyncJobResponse>> syncIndexInfos(
-      @Valid @RequestBody IndexInfoSyncRequest request,
       HttpServletRequest servletRequest) {
 
     String workerIp = servletRequest.getRemoteAddr();
-    List<SyncJobResponse> results = syncJobService.syncIndexInfos(request.targetDate(), workerIp);
+    List<SyncJobResponse> results = syncJobService.syncIndexInfos(workerIp);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
   }
 
@@ -55,7 +53,7 @@ public class SyncJobController implements SyncJobApi {
   @GetMapping
   @Override
   public ResponseEntity<CursorPageResponse<SyncJobResponse>> getSyncJobHistory(
-      @Valid @ParameterObject @ModelAttribute SyncJobSearchCondition condition,
+      @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID idAfter,
       @RequestParam(defaultValue = "jobTime") String sortField,
