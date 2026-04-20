@@ -2,7 +2,6 @@ package com.sprint.mission.findex.domain.syncjob.controller;
 
 import com.sprint.mission.findex.domain.syncjob.controller.api.SyncJobApi;
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.service.SyncJobService;
@@ -28,11 +27,10 @@ public class SyncJobController implements SyncJobApi {
   @PostMapping("/index-infos")
   @Override
   public ResponseEntity<List<SyncJobResponse>> syncIndexInfos(
-      @Valid @RequestBody IndexInfoSyncRequest request,
       HttpServletRequest servletRequest) {
 
     String workerIp = servletRequest.getRemoteAddr();
-    List<SyncJobResponse> results = syncJobService.syncIndexInfos(request.targetDate(), workerIp);
+    List<SyncJobResponse> results = syncJobService.syncIndexInfos(workerIp);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
   }
 

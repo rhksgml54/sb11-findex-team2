@@ -1,7 +1,6 @@
 package com.sprint.mission.findex.domain.syncjob.controller.api;
 
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
@@ -24,7 +23,6 @@ public interface SyncJobApi {
 
   @Operation(summary = "지수 정보 연동", description = "KRX Open API에서 기준 날짜의 전체 지수 정보를 조회하여 DB에 생성 또는 갱신하고 SyncJob 이력을 저장합니다.")
   ResponseEntity<List<SyncJobResponse>> syncIndexInfos(
-      @Valid @RequestBody IndexInfoSyncRequest request,
       HttpServletRequest servletRequest);
 
   @Operation(summary = "지수 데이터 연동", description = "지정한 기간(baseDateFrom ~ baseDateTo)의 하나 이상의 지수 데이터를 외부 API로부터 연동합니다.")
