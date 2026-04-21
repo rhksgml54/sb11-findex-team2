@@ -47,7 +47,7 @@ public class SyncJobService {
     LocalDate targetDate = null;
     List<IndexDataApiResponse> responses = List.of();
 
-    for (int i = 0; i <= 7; i++) {
+    for (int i = 0; i <= 14; i++) {
       LocalDate candidate = LocalDate.now().minusDays(i);
       responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
       if (!responses.isEmpty()) {
