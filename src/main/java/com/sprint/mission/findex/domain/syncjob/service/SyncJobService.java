@@ -63,20 +63,28 @@ public class SyncJobService {
     } else {
       for (int i = 0; i <= defaultSyncDays; i++) {
         LocalDate candidate = LocalDate.now(KST).minusDays(i);
-        responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
-        if (!responses.isEmpty()) {
-          targetDate = candidate;
-          break;
+        try {
+          responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+          if (!responses.isEmpty()) {
+            targetDate = candidate;
+            break;
+          }
+        } catch (ApiException e) {
+          log.warn("[IndexInfo Sync] {} 데이터 조회 실패, 다음 날짜로 탐색: {}", candidate, e.getMessage());
         }
       }
       if (responses.isEmpty()) {
         log.warn("[IndexInfo Sync] 최근 {}일 이내 데이터 없음, 최대 {}일까지 확장 탐색", defaultSyncDays, fallbackLimitDays);
         for (int i = defaultSyncDays + 1; i <= fallbackLimitDays; i++) {
           LocalDate candidate = LocalDate.now(KST).minusDays(i);
-          responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
-          if (!responses.isEmpty()) {
-            targetDate = candidate;
-            break;
+          try {
+            responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+            if (!responses.isEmpty()) {
+              targetDate = candidate;
+              break;
+            }
+          } catch (ApiException e) {
+            log.warn("[IndexInfo Sync] {} 데이터 조회 실패, 다음 날짜로 탐색: {}", candidate, e.getMessage());
           }
         }
       }
