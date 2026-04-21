@@ -18,6 +18,7 @@ import com.sprint.mission.findex.domain.syncjob.repository.SyncJobRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -43,23 +44,29 @@ public class SyncJobService {
   private final IndexDataMapper indexDataMapper;
   private final IndexInfoSyncProcessor indexInfoSyncProcessor;
 
+  private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+  private static final int FALLBACK_DAYS = 14;
+
   private final IndexDataSyncProcessor indexDataSyncProcessor;
 
-  public List<SyncJobResponse> syncIndexInfos(String workerIp) {
-    LocalDate targetDate = null;
+  public List<SyncJobResponse> syncIndexInfos(LocalDate targetDate, String workerIp) {
     List<IndexDataApiResponse> responses = List.of();
 
-    for (int i = 0; i <= 14; i++) {
-      LocalDate candidate = LocalDate.now().minusDays(i);
-      responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
-      if (!responses.isEmpty()) {
-        targetDate = candidate;
-        break;
+    if (targetDate != null) {
+      responses = krxOpenApiClient.fetchByDateRange(null, targetDate, targetDate);
+    } else {
+      for (int i = 0; i <= FALLBACK_DAYS; i++) {
+        LocalDate candidate = LocalDate.now(KST).minusDays(i);
+        responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+        if (!responses.isEmpty()) {
+          targetDate = candidate;
+          break;
+        }
       }
     }
 
     if (responses.isEmpty()) {
-      throw new ApiException(ApiException.ERROR.INDEX_INFO_NOT_FOUND);
+      throw new ApiException(ApiException.ERROR.SYNC_JOB_OPEN_API_ERROR);
     }
 
     List<SyncJobResponse> results = new ArrayList<>();

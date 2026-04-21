@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,10 +28,11 @@ public class SyncJobController implements SyncJobApi {
   @PostMapping("/index-infos")
   @Override
   public ResponseEntity<List<SyncJobResponse>> syncIndexInfos(
+      @RequestParam(required = false) LocalDate targetDate,
       HttpServletRequest servletRequest) {
 
     String workerIp = servletRequest.getRemoteAddr();
-    List<SyncJobResponse> results = syncJobService.syncIndexInfos(workerIp);
+    List<SyncJobResponse> results = syncJobService.syncIndexInfos(targetDate, workerIp);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
   }
 
