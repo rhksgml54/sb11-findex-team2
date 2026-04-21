@@ -29,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +46,12 @@ public class SyncJobService {
   private final IndexInfoSyncProcessor indexInfoSyncProcessor;
 
   private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-  private static final int FALLBACK_DAYS = 14;
+
+  @Value("${sync.default-sync-days:7}")
+  private int defaultSyncDays;
+
+  @Value("${sync.fallback-limit-days:14}")
+  private int fallbackLimitDays;
 
   private final IndexDataSyncProcessor indexDataSyncProcessor;
 
@@ -55,12 +61,23 @@ public class SyncJobService {
     if (targetDate != null) {
       responses = krxOpenApiClient.fetchByDateRange(null, targetDate, targetDate);
     } else {
-      for (int i = 0; i <= FALLBACK_DAYS; i++) {
+      for (int i = 0; i <= defaultSyncDays; i++) {
         LocalDate candidate = LocalDate.now(KST).minusDays(i);
         responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
         if (!responses.isEmpty()) {
           targetDate = candidate;
           break;
+        }
+      }
+      if (responses.isEmpty()) {
+        log.warn("[IndexInfo Sync] 최근 {}일 이내 데이터 없음, 최대 {}일까지 확장 탐색", defaultSyncDays, fallbackLimitDays);
+        for (int i = defaultSyncDays + 1; i <= fallbackLimitDays; i++) {
+          LocalDate candidate = LocalDate.now(KST).minusDays(i);
+          responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+          if (!responses.isEmpty()) {
+            targetDate = candidate;
+            break;
+          }
         }
       }
     }
