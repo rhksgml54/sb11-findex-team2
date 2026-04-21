@@ -89,7 +89,6 @@ public class SyncJobService {
     }
     return results;
   }
-  //
   public List<SyncJobResponse> syncIndexData(List<UUID> indexInfoIds, LocalDate baseDateFrom, LocalDate baseDateTo, String workerIp) {
 
     if (baseDateFrom.isAfter(baseDateTo)) {

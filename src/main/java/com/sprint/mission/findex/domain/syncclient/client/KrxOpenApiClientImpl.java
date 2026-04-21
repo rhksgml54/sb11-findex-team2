@@ -100,7 +100,7 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
         }
 
         URI uri = builder.build(true).toUri();
-        log.debug("[KRX API] 요청 URL: {}", uri);
+        log.debug("[KRX API] 요청 - pageNo: {}, from: {}, to: {}, indexName: {}", pageNo, from, to, indexName);
 
         String responseBody = restClient.get()
                 .uri(uri)
