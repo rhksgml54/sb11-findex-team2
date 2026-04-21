@@ -165,12 +165,12 @@ public class SyncJobService {
 
         String logMessage = isSingleDay
             ? null
-            : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, dataSize);
+            : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, indexDataList.size());
 
         results.add(indexDataSyncProcessor.saveIndexDataAndHistory(
             indexDataList, indexInfo, actualTargetDate, workerIp, logMessage));
         log.info("[Sync 성공] 지수: {}, 요청범위: {} ~ {} -> 실제연동기준일: {} ({}건)",
-            indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, dataSize);
+            indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, indexDataList.size());
 
       } catch (Exception e) {
         String errorLog = isSingleDay
