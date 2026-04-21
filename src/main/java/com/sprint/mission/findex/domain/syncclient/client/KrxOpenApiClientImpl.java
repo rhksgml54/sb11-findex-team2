@@ -118,7 +118,7 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
             wrapper = objectMapper.readValue(responseBody, KrxApiResponseWrapper.class);
         } catch (JsonProcessingException e) {
             log.error("[KRX API] JSON 파싱 실패: {}", e.getMessage());
-            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
+            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR, e);
         }
 
         validateResponse(wrapper);
@@ -132,7 +132,7 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
     }
 
     private void validateResponse(KrxApiResponseWrapper wrapper) {
-        if (wrapper.response() == null || wrapper.response().header() == null) {
+        if (wrapper == null || wrapper.response() == null || wrapper.response().header() == null) {
             throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
         }
         if (!"00".equals(wrapper.response().header().resultCode())) {
