@@ -79,8 +79,8 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
         } catch (ApiException e) {
             throw e;
         } catch (RestClientException e) {
-            log.error("[KRX API] HTTP 호출 실패: {}", e.getMessage());
-            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
+            log.error("[KRX API] HTTP 호출 실패: {}", e.getMessage(), e);
+            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR, e);
         }
 
         return allItems.isEmpty() ? Collections.emptyList() : allItems;
