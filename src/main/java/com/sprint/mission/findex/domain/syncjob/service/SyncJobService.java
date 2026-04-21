@@ -43,6 +43,8 @@ public class SyncJobService {
   private final IndexDataMapper indexDataMapper;
   private final IndexInfoSyncProcessor indexInfoSyncProcessor;
 
+  private final IndexDataSyncProcessor indexDataSyncProcessor;
+
   public List<SyncJobResponse> syncIndexInfos(String workerIp) {
     LocalDate targetDate = null;
     List<IndexDataApiResponse> responses = List.of();
@@ -120,32 +122,30 @@ public class SyncJobService {
 
         LocalDate actualTargetDate = baseDateTo;
 
-        if (dataSize > 0) {
-          Set<LocalDate> existingDates = indexDataRepository
-              .findByIndexInfoIdAndBaseDateBetween(indexInfo.getId(), baseDateFrom, baseDateTo)
-              .stream()
+        Set<LocalDate> existingDates = indexDataRepository
+            .findByIndexInfoIdAndBaseDateBetween(indexInfo.getId(), baseDateFrom, baseDateTo)
+            .stream()
+            .map(IndexData::getBaseDate)
+            .collect(Collectors.toSet());
+
+        List<IndexData> indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo)
+            .stream()
+            .filter(d -> !existingDates.contains(d.getBaseDate()))
+            .collect(Collectors.toList());
+
+        if (!indexDataList.isEmpty()) {
+          actualTargetDate = indexDataList.stream()
               .map(IndexData::getBaseDate)
-              .collect(Collectors.toSet());
-
-          List<IndexData> indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo)
-              .stream()
-              .filter(d -> !existingDates.contains(d.getBaseDate()))
-              .collect(Collectors.toList());
-
-          if (!indexDataList.isEmpty()) {
-            saveData(indexDataList);
-            actualTargetDate = indexDataList.stream()
-                .map(IndexData::getBaseDate)
-                .max(LocalDate::compareTo)
-                .orElse(baseDateTo);
-          }
+              .max(LocalDate::compareTo)
+              .orElse(baseDateTo);
         }
 
         String logMessage = isSingleDay
             ? null
             : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, dataSize);
 
-        results.add(saveSyncJobHistory(indexInfo, JobType.INDEX_DATA, actualTargetDate, workerIp, JobResult.SUCCESS, logMessage));
+        results.add(indexDataSyncProcessor.saveIndexDataAndHistory(
+            indexDataList, indexInfo, actualTargetDate, workerIp, logMessage));
         log.info("[Sync 성공] 지수: {}, 요청범위: {} ~ {} -> 실제연동기준일: {} ({}건)",
             indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, dataSize);
 
@@ -172,11 +172,6 @@ public class SyncJobService {
       int size) {
 
     return syncJobRepository.searchSyncJobPage(condition, cursor, idAfter, sortField, sortDirection, size);
-  }
-
-  @Transactional
-  protected void saveData(List<IndexData> indexDataList) {
-    indexDataRepository.saveAll(indexDataList);
   }
 
   private IndexInfoCreateRequest toCreateRequest(IndexDataApiResponse response) {
