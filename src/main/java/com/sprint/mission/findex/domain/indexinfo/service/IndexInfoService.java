@@ -40,8 +40,8 @@ public class IndexInfoService {
   }
 
   @Transactional
-  public IndexInfoResponse createByOpenAPI(IndexInfoCreateRequest req) {
-    return mapper.toResponse(create(req, SourceType.OPEN_API));
+  public IndexInfo createByOpenAPI(IndexInfoCreateRequest req) {
+    return create(req, SourceType.OPEN_API);
   }
 
   @Transactional
