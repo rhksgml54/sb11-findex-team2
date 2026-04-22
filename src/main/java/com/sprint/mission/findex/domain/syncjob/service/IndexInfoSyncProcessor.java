@@ -1,9 +1,13 @@
 package com.sprint.mission.findex.domain.syncjob.service;
 
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
+import com.sprint.mission.findex.domain.indexinfo.repository.IndexInfoRepository;
 import com.sprint.mission.findex.domain.indexinfo.service.IndexInfoService;
+import com.sprint.mission.findex.global.exception.ApiException;
+import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.entity.JobResult;
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
@@ -19,12 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class IndexInfoSyncProcessor {
 
     private final IndexInfoService indexInfoService;
+    private final IndexInfoRepository indexInfoRepository;
     private final SyncJobRepository syncJobRepository;
 
     @Transactional
     public SyncJobResponse createAndSaveHistory(IndexInfoCreateRequest createRequest, LocalDate targetDate, String workerIp) {
-        IndexInfo created = indexInfoService.createByOpenAPI(createRequest);
-        return saveHistory(created, targetDate, workerIp, JobResult.SUCCESS, null);
+        IndexInfoResponse created = indexInfoService.createByOpenAPI(createRequest);
+        IndexInfo indexInfo = indexInfoRepository.findById(created.id())
+            .orElseThrow(() -> new ApiException(ERROR.INDEX_INFO_NOT_FOUND));
+        return saveHistory(indexInfo, targetDate, workerIp, JobResult.SUCCESS, null);
     }
 
     @Transactional
