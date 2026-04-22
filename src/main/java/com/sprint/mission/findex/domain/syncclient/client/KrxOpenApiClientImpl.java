@@ -56,7 +56,7 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
     @Cacheable(
         value = "krxDailyData",
         key = "#indexName + ':' + #from + ':' + #to",
-        condition = "#to.isBefore(T(java.time.LocalDate).now())"
+        condition = "#to != null && #from != null && #to.isBefore(T(java.time.LocalDate).now(T(java.time.ZoneId).of('Asia/Seoul')))"
     )
     @Override
     public List<IndexDataApiResponse> fetchByDateRange(String indexName, LocalDate from, LocalDate to) {
