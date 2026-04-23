@@ -5,14 +5,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Schema(name = "IndexDataSyncRequest", description = "지수 데이터 연동 요청")
 public record IndexDataSyncRequest(
 
-    @Schema(description = "지수 정보 ID 목록")
+    @Schema(description = "지수 정보 ID 목록 (-1은 전체 지수 연동)")
     @NotEmpty(message = "최소 하나 이상의 지수 정보 ID가 필요합니다.")
-    List<UUID> indexInfoIds,
+    List<String> indexInfoIds,
 
     @Schema(description = "대상 날짜(부터)")
     @NotNull(message = "시작일(baseDateFrom)은 필수입니다.")
