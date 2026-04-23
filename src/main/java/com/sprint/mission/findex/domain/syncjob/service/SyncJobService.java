@@ -238,6 +238,11 @@ public class SyncJobService {
 
   private void trySaveIndexData(IndexDataApiResponse response, IndexInfo indexInfo, LocalDate targetDate, String workerIp) {
     try {
+      LocalDate responseDate = LocalDate.parse(response.basDt(), DateTimeFormatter.BASIC_ISO_DATE);
+      if (!responseDate.isEqual(targetDate)) {
+        log.warn("[IndexData Sync 스킵] 지수: {}, 날짜 불일치: 요청={}, 응답={}", indexInfo.getIndexName(), targetDate, responseDate);
+        return;
+      }
       if (!indexDataRepository.existsByIndexInfoAndBaseDate(indexInfo, targetDate)) {
         IndexData indexData = indexDataMapper.toEntity(response, indexInfo);
         indexDataSyncProcessor.saveIndexDataAndHistory(List.of(indexData), indexInfo, targetDate, workerIp, null);
