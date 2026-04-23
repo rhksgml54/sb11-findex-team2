@@ -66,6 +66,17 @@ public class SyncJobController implements SyncJobApi {
 
   private String maskIp(String ip) {
     if (ip == null) return "unknown";
-    return "xxx.xxx.xxx.xxx";
+    if (ip.contains(":")) {
+      String[] parts = ip.split(":", -1);
+      if (parts.length >= 2) {
+        return parts[0] + ":" + parts[1] + ":*:*:*:*:*:*";
+      }
+      return "*:*:*:*:*:*:*:*";
+    }
+    String[] parts = ip.split("\\.", -1);
+    if (parts.length == 4) {
+      return parts[0] + "." + parts[1] + ".*.*";
+    }
+    return "*.*.*.*";
   }
 }
