@@ -243,7 +243,8 @@ public class SyncJobService {
         indexDataSyncProcessor.saveIndexDataAndHistory(List.of(indexData), indexInfo, targetDate, workerIp, null);
       }
     } catch (Exception e) {
-      log.warn("[IndexData Sync 스킵] 지수: {}, 날짜: {}, 사유: {}", indexInfo.getIndexName(), targetDate, e.getMessage());
+      String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+      log.warn("[IndexData Sync 실패] 지수: {}, 날짜: {}, 사유: {}", indexInfo.getIndexName(), targetDate, errorMsg);
     }
   }
 
