@@ -35,7 +35,7 @@ public class SyncJobController implements SyncJobApi {
       @RequestParam(required = false) LocalDate targetDate,
       HttpServletRequest servletRequest) {
 
-    String workerIp = servletRequest.getRemoteAddr();
+    String workerIp = maskIp(servletRequest.getRemoteAddr());
     List<SyncJobResponse> results = syncJobService.syncIndexInfos(targetDate, workerIp);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
   }
@@ -46,7 +46,7 @@ public class SyncJobController implements SyncJobApi {
       @Valid @RequestBody IndexDataSyncRequest request,
       HttpServletRequest servletRequest) {
 
-    String workerIp = servletRequest.getRemoteAddr();
+    String workerIp = maskIp(servletRequest.getRemoteAddr());
     List<SyncJobResponse> results = syncJobService.syncIndexData(
         request.indexInfoIds(),
         request.baseDateFrom(),
@@ -62,5 +62,10 @@ public class SyncJobController implements SyncJobApi {
       @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition) {
 
     return ResponseEntity.ok(syncJobService.getSyncJobHistory(condition));
+  }
+
+  private String maskIp(String ip) {
+    if (ip == null) return "unknown";
+    return "xxx.xxx.xxx.xxx";
   }
 }
